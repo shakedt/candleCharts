@@ -1,27 +1,62 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import CandleStickStockScaleChart from './components/CandleStickChart';
 import './App.css';
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      normal: {},
+      week: {}
+    };
+  }
+  componentDidMount() {
+    this.getData('', 'normal');
+    this.getData('WEEK_1', 'week');
+  }
   render() {
     return (
       <div className="App">
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
+            {this.state.normal.length > 0 &&
+            <div> normal Chart
+              <CandleStickStockScaleChart
+                data={this.state.normal}
+                width={800}
+                ratio={1}
+              />
+            </div> }
+
+
+            {this.state.week.length > 0 &&
+              <div> week Chart
+              <CandleStickStockScaleChart
+              data={this.state.week}
+              width={800}
+              ratio={1}
+              />
+              </div>
+            }
         </header>
       </div>
     );
+  }
+
+  getData(time = '', chartType = '') {
+    fetch(`https://www.fxempire.com/api/v1/en/markets/eur-usd/chart?time=${time}`)
+      .then(function(response) {
+        return response.json();
+      })
+      .then(function(myJson) {
+        const cleanJson = myJson.map((data) => {
+          data.date = new Date(data.date);
+          return data;
+        });
+        this.setState({
+          [chartType] : cleanJson
+        });
+      }.bind(this));
   }
 }
 
